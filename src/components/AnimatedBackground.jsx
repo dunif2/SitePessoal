@@ -1,110 +1,83 @@
-import { useEffect, useState } from "react";
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import ParticleNetwork from "./ParticleNetwork";
 
-// One accent per section, so the ambient glow shifts as you scroll — the
-// background reads as "moving between topics" instead of a static wallpaper.
-// Colors cycle indigo -> cyan -> magenta -> emerald so neighbors never repeat.
-const SECTION_ACCENTS = {
-  hero: "indigo",
-  sobre: "cyan",
-  skills: "magenta",
-  projetos: "emerald",
-  experiencia: "indigo",
-  contato: "cyan",
-};
-
-const ACCENT_CHANNELS = {
-  indigo: [111, 0, 255],
-  cyan: [73, 242, 255],
-  magenta: [184, 41, 255],
-  emerald: [52, 211, 153],
-};
-
+// Layered parallax background: three depths drifting at different fractions
+// of scroll progress, so the page reads as having real depth instead of a
+// flat, pinned wallpaper.
+//
+//   Layer 1 (deep)  — soft neon light blobs + grid, barely moves.
+//   Layer 2 (mid)   — ParticleNetwork's ambient "stardust", drifts a bit more.
+//   Layer 3 (front) — the actual page content in App.jsx, scrolls normally.
+//
+// The ranges are bounded (tens/hundreds of px, not raw scroll pixels) rather
+// than a literal "scrollY * factor": with a fixed background, an unbounded
+// multiplier eventually drags the layer fully out of frame on a long page,
+// which would empty out the background well before the user reaches the
+// footer. Mapping scrollYProgress (0-1 across the whole document) to a small
+// fixed range keeps the "layers move at different speeds" illusion for the
+// entire scroll, in every browser, regardless of how tall the page grows.
 export default function AnimatedBackground() {
-  const [activeAccent, setActiveAccent] = useState("indigo");
-  const [glowR, glowG, glowB] = ACCENT_CHANNELS[activeAccent];
-  const [scrollY, setScrollY] = useState(0);
+  const { scrollYProgress } = useScroll();
+  const shouldReduceMotion = useReducedMotion();
 
-  // Track which section is centered in the viewport and tint the background
-  // to that section's accent color (soft crossfade via opacity, not by
-  // interpolating the gradient itself — that isn't reliably animatable).
-  useEffect(() => {
-    const sections = Array.from(document.querySelectorAll("section[id]"));
-    if (sections.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting);
-        if (visible.length === 0) return;
-        const mostVisible = visible.reduce((a, b) =>
-          b.intersectionRatio > a.intersectionRatio ? b : a
-        );
-        const accent = SECTION_ACCENTS[mostVisible.target.id];
-        if (accent) setActiveAccent(accent);
-      },
-      { threshold: [0.25, 0.5, 0.75] }
-    );
-
-    sections.forEach((s) => observer.observe(s));
-    return () => observer.disconnect();
-  }, []);
-
-  // Subtle parallax so the grid layer visibly shifts as the page scrolls,
-  // instead of feeling pinned in place behind the content.
-  useEffect(() => {
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-    if (reduceMotion) return;
-
-    let raf = null;
-    const onScroll = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        setScrollY(window.scrollY);
-        raf = null;
-      });
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, []);
+  const yDeep = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [0, shouldReduceMotion ? 0 : -90]
+  );
+  const yMid = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [0, shouldReduceMotion ? 0 : -220]
+  );
 
   return (
     <div className="fixed inset-0 -z-30 overflow-hidden bg-[var(--color-bg)]">
-      {/* subtle grid, drifting slowly with scroll for a sense of depth */}
-      <div
-        className="absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage:
-            "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
-          backgroundSize: "56px 56px",
-          transform: `translateY(${scrollY * 0.06}px)`,
-        }}
-      />
+      {/* Layer 1 — deep background: grid + slow-drifting neon blobs */}
+      <motion.div
+        style={{ y: yDeep, willChange: "transform" }}
+        className="absolute inset-0 pointer-events-none"
+      >
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+            backgroundSize: "56px 56px",
+          }}
+        />
+        <div
+          className="absolute -top-[15%] -left-[10%] w-[60vmax] h-[60vmax] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(73,242,255,0.24), transparent 70%)",
+          }}
+        />
+        <div
+          className="absolute top-[18%] -right-[18%] w-[70vmax] h-[70vmax] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(111,0,255,0.28), transparent 70%)",
+          }}
+        />
+        <div
+          className="absolute -bottom-[12%] left-[2%] w-[62vmax] h-[62vmax] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(184,41,255,0.24), transparent 70%)",
+          }}
+        />
+      </motion.div>
 
-      {/* per-section ambient glow: a single layer whose color channels ease
-          toward the active section's accent (registered via @property so the
-          browser can tween the numbers, instead of stacking one layer per
-          color — cheap on the compositor even with the glass-card blur above it) */}
-      <div
-        className="absolute inset-0"
-        style={{
-          "--glow-r": glowR,
-          "--glow-g": glowG,
-          "--glow-b": glowB,
-          transition:
-            "--glow-r 1400ms ease-out, --glow-g 1400ms ease-out, --glow-b 1400ms ease-out",
-          background:
-            "radial-gradient(circle at 50% 32%, rgba(var(--glow-r), var(--glow-g), var(--glow-b), 0.16), transparent 62%)",
-        }}
-      />
+      {/* Layer 2 — mid depth: ambient particle "stardust" */}
+      <motion.div
+        style={{ y: yMid, willChange: "transform" }}
+        className="absolute inset-0 pointer-events-none"
+      >
+        <ParticleNetwork />
+      </motion.div>
 
-      <ParticleNetwork />
-
-      {/* vignette */}
+      {/* vignette — static, just darkens the edges */}
       <div
         className="absolute inset-0"
         style={{

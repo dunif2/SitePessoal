@@ -1,24 +1,5 @@
 @import "tailwindcss";
 
-/* Typed custom properties so AnimatedBackground can transition the ambient
-   glow's RGB channels as numbers (a plain custom property can't be
-   animated/transitioned by the browser without this). */
-@property --glow-r {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 111;
-}
-@property --glow-g {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 0;
-}
-@property --glow-b {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 255;
-}
-
 @theme {
   --font-display: "Space Grotesk", sans-serif;
   --font-body: "Inter", sans-serif;
