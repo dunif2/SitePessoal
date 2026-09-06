@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+/* Typed custom properties so AnimatedBackground can transition the ambient
+   glow's RGB channels as numbers (a plain custom property can't be
+   animated/transitioned by the browser without this). */
+@property --glow-r {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 111;
+}
+@property --glow-g {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --glow-b {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 255;
+}
+
+@theme {
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-bg: #0A0A0C;
+  --color-bg-elevated: #101014;
+  --color-card: #16161C;
+  --color-border: #2A2A33;
+  --color-text: #F5F7FA;
+  --color-text-muted: #9297B5;
+  --color-indigo: #6F00FF;
+  --color-magenta: #B829FF;
+  --color-cyan: #49F2FF;
+  --color-emerald: #34D399;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+  }
+  ::selection {
+    background-color: var(--color-emerald);
+    color: var(--color-bg);
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+  .glass-card {
+    background: rgba(21, 26, 51, 0.55);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 0 0 1px rgba(73, 242, 255, 0.04), 0 8px 32px rgba(111, 0, 255, 0.08);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .glass-card:hover {
+    border-color: rgba(73, 242, 255, 0.4);
+    box-shadow: 0 0 24px rgba(73, 242, 255, 0.12), 0 0 40px rgba(184, 41, 255, 0.08);
+  }
+  .gradient-text {
+    background: linear-gradient(90deg, #E7E9F2 0%, #C7CBE0 45%, #9FB8C9 75%, #7C93B0 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .neon-btn {
+    box-shadow: 0 0 16px rgba(73, 242, 255, 0.35), 0 0 32px rgba(111, 0, 255, 0.2);
+  }
+  .neon-text-glow {
+    text-shadow: 0 0 12px rgba(73, 242, 255, 0.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
