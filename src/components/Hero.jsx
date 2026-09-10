@@ -1,7 +1,11 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, lazy, Suspense } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
 import photo from "../assets/ricardo-photo.jpg";
+
+// Three.js is a heavy dependency (~700KB) that only the Hero needs, so it's
+// code-split out of the main bundle and only fetched once the Hero mounts.
+const Beams = lazy(() => import("./Beams"));
 
 const COMMAND = "whoami";
 const NAME = "Ricardo Pereira Marccelli Filho";
@@ -9,6 +13,7 @@ const NAME = "Ricardo Pereira Marccelli Filho";
 export default function Hero() {
   const [typed, setTyped] = useState("");
   const [showResult, setShowResult] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
     let i = 0;
@@ -26,8 +31,42 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex flex-col items-center justify-center px-6 text-center"
+      className="relative min-h-screen flex flex-col items-center justify-center px-6 text-center overflow-hidden"
     >
+      {/* Beams background — scoped to the Hero section only (absolute, not
+          fixed): once you scroll past it, the regular AnimatedBackground
+          (grid + particles) takes over for the rest of the page, which is
+          the "divisa" between the two. Skipped entirely under
+          prefers-reduced-motion instead of running the WebGL animation. */}
+      {!shouldReduceMotion && (
+        <div className="absolute inset-0 -z-10 pointer-events-none">
+          <Suspense fallback={null}>
+            <Beams
+              beamWidth={2}
+              beamHeight={15}
+              beamNumber={8}
+              lightColor="#49F2FF"
+              beamColor="#120a24"
+              backgroundColor="#0A0A0C"
+              speed={1.5}
+              noiseIntensity={1.75}
+              scale={0.2}
+              rotation={15}
+            />
+          </Suspense>
+          {/* scrim so the name/buttons stay readable over the beams,
+              especially on narrow/tall viewports where they fill more of
+              the frame */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(ellipse at 50% 40%, rgba(10,10,12,0.35) 0%, rgba(10,10,12,0.6) 75%, rgba(10,10,12,0.75) 100%)",
+            }}
+          />
+        </div>
+      )}
+
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
