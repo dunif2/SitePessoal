@@ -1,15 +1,17 @@
 # Personal Website — Ricardo Pereira Marccelli Filho
 
-Portfólio pessoal em React + Vite: hero com efeito de terminal, projetos
-(incluindo o assistente local **Argus** e interfaces de UI para Roblox),
-experiência e contato. Tema dark com acentos neon (cyan/indigo/magenta),
-fundo animado em canvas e microanimações via Framer Motion.
+Portfólio pessoal em React + Vite: hero com efeito de terminal e fundo 3D
+(Beams, via Three.js), projetos (incluindo o assistente local **Argus** e
+interfaces de UI para Roblox), experiência e contato. Tema dark com acentos
+neon (cyan/indigo/magenta), fundo animado em canvas do "Sobre" pra baixo e
+microanimações via Framer Motion.
 
 ## Stack
 
 - [React 19](https://react.dev) + [Vite](https://vitejs.dev)
 - [Tailwind CSS v4](https://tailwindcss.com) (via `@tailwindcss/vite`)
 - [Framer Motion](https://www.framer.com/motion/) para as animações
+- [Three.js](https://threejs.org) + [React Three Fiber](https://r3f.docs.pmnd.rs)/[drei](https://github.com/pmndrs/drei) para o fundo 3D do Hero (carregado sob demanda, só no Hero)
 - [Lucide](https://lucide.dev) para ícones
 - [Oxlint](https://oxc.rs) para lint
 
