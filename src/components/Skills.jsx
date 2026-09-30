@@ -4,13 +4,18 @@ import SectionHeading from "./SectionHeading";
 const groups = [
   {
     label: "Linguagens",
-    items: ["C", "Python", "JavaScript"],
+    items: ["C", "Python", "JavaScript", "Java", "Lua", "HTML", "CSS"],
     accent: "var(--color-cyan)",
   },
   {
-    label: "Dev & Infra",
-    items: ["React", "Docker"],
+    label: "Dev & Ferramentas",
+    items: ["React", "Docker", "VS Code", "PowerShell"],
     accent: "var(--color-indigo)",
+  },
+  {
+    label: "Game Dev & 3D",
+    items: ["Godot", "Unreal Engine", "Blender", "Three.js", "Roblox Studio"],
+    accent: "var(--color-emerald)",
   },
   {
     label: "UI/UX Design",
@@ -23,7 +28,7 @@ export default function Skills() {
   return (
     <section id="skills" className="relative py-28 px-6 max-w-5xl mx-auto">
       <SectionHeading eyebrow="// skills" title="Com o que eu trabalho" />
-      <div className="grid sm:grid-cols-3 gap-6">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {groups.map((g, gi) => (
           <Reveal key={g.label} delay={gi * 0.1}>
             <div className="glass-card rounded-2xl p-8 h-full">
